@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Electronic store</title>
+    <link rel="stylesheet" href="src/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css"
+    />
+  </head>
+  <body>
+    <!--Popup window-->
+    <div class="popup" id="popup">
+      <div class="overlay"></div>
+      <div class="content">
+        <div class="close-btn">&times;</div>
+        <div class="navbar">
+          <h2>Shopping Cart</h2>
+
+          <div class="cart">
+            
+            <div id="cartAmount" class="cartAmount">0</div>
+          </div>
+        </div>
+        <div id="label" class="text-center"></div>
+        <div class="shopping-cart" id="shopping-cart"></div>
+      </div>
+    </div>
+    <button onclick="togglePopup()">Show popup</button>
+    <!--Popup window-->
+   
+
+  <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+  <script src="src/data.js"></script>
+
+  <script src="src/cart.js"></script>
+  <script>
+    function togglePopup() {
+      document.getElementById("popup").classList.toggle("active");
+    }
+  </script>
+</html>
