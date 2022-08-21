@@ -1,0 +1,219 @@
+let shop = document.getElementById("shop");
+let basket = JSON.parse(localStorage.getItem("data")) || [];
+let label = document.getElementById("label");
+let shoppingCart = document.getElementById("shopping-cart");
+// import * as test from "./cart.js"
+// let inStock = () => {
+
+//   console.log(a);
+// };
+// inStock();
+let db = new Dexie("productList");
+db.version(1).stores({
+  productList: "id",
+});
+db.productList
+  .bulkAdd(shopItemsData)
+  .then(function (lastKey) {
+    console.log("Done adding 100,000 raindrops all over the place");
+    console.log("Last raindrop's id was: " + lastKey); // Will be 100000.
+  })
+  .catch(Dexie.BulkError, function (e) {
+    // Explicitely catching the bulkAdd() operation makes those successful
+    // additions commit despite that there were errors.
+    console.error(
+      "Some raindrops did not succeed. However, " +
+        100000 -
+        e.failures.length +
+        " raindrops was added successfully"
+    );
+  });
+let shopData = [];
+
+let generateShop = () => {
+  db.productList.toArray((r) => {
+    shopData = [...r];
+    console.log("Array", shopData);
+
+    return (shop.innerHTML = shopData
+      .map((x) => {
+        let { id, name, price, desc, img } = x;
+        let search = basket.find((x) => x.id === id) || [];
+        return ` <div id= product-id-${id}
+        class="item">
+      <img id="img" width="100%" src="${img}" alt="" />
+      <div class="details1">
+        <h3>${name}</h3>
+        <p>In Stock: ${desc}</p>
+        <div class="price-quantity">
+          <h2>$ ${price}</h2>
+          <div class="buttons">
+            <i onclick="decrement(${id})" class="bi bi-dash-lg"></i>
+            <div id=${id} class="quantity">${
+          search.item === undefined ? 0 : search.item
+        }</div>
+            <i onclick="increment(${id},${desc})" class="bi bi-plus-lg"></i>
+          </div>
+        </div>
+      </div>
+    </div>`;
+      })
+      .join(""));
+  });
+};
+generateShop();
+let generateCartItems = () => {
+  document.getElementById("popup").classList.toggle("active");
+  TotalAmount();
+  if (basket.length !== 0) {
+    return (shoppingCart.innerHTML = basket
+      .map((x) => {
+        let { id, item } = x;
+        let search = shopItemsData.find((y) => y.id === id) || [];
+        return `
+        <div class="cart-item">
+        <img  width="100" src=${search.img} alt="" />
+        <div class="details2">
+        <div class="title-price-x">
+        <h4 class="title-price">
+        <p>${search.name}</p>
+        <p class="cart-item-price">$ ${search.price}</p>
+        </h4>
+        
+        </div>
+
+        <div id=${id} class="quantity">Quantity: ${item}</div>
+
+        <h3>$ ${item * search.price}</h3>
+        </div>
+        
+        </div> 
+        `;
+      })
+      .join(""));
+  } else {
+    shoppingCart.innerHTML = ``;
+    label.innerHTML = `<h2>Cart is Empty</h2>
+    <a href = "index.html">
+    <button class = "HomeBtn"> Back to home </button></a>`;
+  }
+};
+
+let TotalAmount = () => {
+  if (basket.length !== 0) {
+    let amount = basket
+      .map((x) => {
+        let { item, id } = x;
+        let search = shopItemsData.find((y) => y.id === id) || [];
+
+        return item * search.price;
+      })
+      .reduce((x, y) => x + y, 0);
+    label.innerHTML = `
+      <h2>Total Bill : $ ${amount}</h2>
+      <button onclick="checkout()" class="checkout">Checkout</button>
+      <button onclick="clearCart()" class="removeAll">Clear Cart</button>
+      `;
+  } else return;
+};
+
+let increment = (id, desc) => {
+  // let { id, desc } = product;
+  console.log(desc);
+
+  let selectedItem = id;
+  let search = basket.find((x) => x.id === selectedItem.id);
+  if (search === undefined) {
+    basket.push({
+      id: selectedItem.id,
+      item: 1,
+    });
+    search = {
+      item: 0,
+    };
+  } else if (search.item < desc) {
+    search.item += 1;
+  } else {
+    search.item = desc;
+    window.alert("Sorry..!!! No more stock available");
+  }
+
+  if (search.item <= desc) {
+    update(selectedItem.id);
+    localStorage.setItem("data", JSON.stringify(basket));
+  } else {
+    window.alert("Sorry..!!! Stock is over");
+  }
+
+  //console.log(search.item);
+  // let a = shopItemsData.map((x) => {
+  //   x.desc === selectedItem.id;
+  // });
+  // console.log(a);
+  // // console.log(selectedItem.desc);
+  // let count = basket.find((x) => x.desc === selectedItem.id);
+  // //if(search.item )
+
+  //count();
+
+  //console.log(basket);
+};
+// let count = () => {
+//   let a = shopItemsData.desc;
+//   console.log(a);
+
+//   console.log(basket);
+// };
+let decrement = (id) => {
+  let selectedItem = id;
+  let search = basket.find((x) => x.id === selectedItem.id);
+  if (search === undefined) return;
+  else if (search.item === 0) return;
+  else {
+    search.item -= 1;
+  }
+  update(selectedItem.id);
+
+  basket = basket.filter((x) => x.item !== 0);
+
+  localStorage.setItem("data", JSON.stringify(basket));
+
+  //console.log(basket);
+};
+let update = (id) => {
+  let search = basket.find((x) => x.id === id);
+  let count = search.item;
+  document.getElementById(id).innerHTML = count;
+  // let a = shopItemsData.map((x) => {
+  //   let desc = x.desc;
+  //   let id = x.id;
+  //   console.log(desc, id);
+  //   //return x.desc;
+  // });
+
+  //console.log(a);
+  //console.log(id);
+  calculation();
+  TotalAmount();
+};
+let clearCart = () => {
+  basket = [];
+  generateCartItems();
+  calculation();
+  localStorage.setItem("data", JSON.stringify(basket));
+};
+
+let checkout = () => {
+  window.location.href = "checkout.html";
+};
+let calculation = () => {
+  let cartIcon = document.getElementById("cartAmount");
+
+  cartIcon.innerHTML = basket.map((x) => x.item).reduce((x, y) => x + y, 0);
+};
+calculation();
+document
+  .querySelector(".popup .close-btn")
+  .addEventListener("click", function () {
+    document.querySelector(".popup").classList.toggle("active");
+  });

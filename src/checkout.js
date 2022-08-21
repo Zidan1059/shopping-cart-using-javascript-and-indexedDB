@@ -27,14 +27,16 @@ if (basket.length !== 0) {
     getReq.onsuccess = (e) => {
       let newRequest = e.target;
       shopData = [...newRequest.result];
+      //console.log(shopData);
       basket.map((x) => {
         let { item, id } = x;
-        let search = shopData.findIndex((y) => y.id === id) || [];
-        if (search) {
-          shopData[search].desc = shopData[search].desc - item;
-        }
+        //console.log(x);
+        let search = shopData.findIndex((y) => y.id === id) || 0;
+        //console.log("search", search);
+
+        shopData[search].desc = shopData[search].desc - item;
       });
-      console.log("shopData", shopData);
+      //console.log("shopData", shopData);
       customerObjectStore.clear();
 
       customerObjectStore = db

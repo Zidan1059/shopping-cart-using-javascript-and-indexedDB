@@ -1,0 +1,41 @@
+let label = document.getElementById("label");
+label.innerHTML = `<h2>Thank You for shopping...!</h2>
+<a href = "index.html">
+<button class = "HomeBtn"> Back to home </button></a>`;
+let basket = JSON.parse(localStorage.getItem("data")) || [];
+let db = new Dexie("productList");
+db.version(1).stores({
+  productList: "id",
+});
+
+if (basket.length !== 0) {
+  db?.productList?.toArray((r) => {
+    shopData = [...r];
+    console.log(shopData);
+    basket.map((x) => {
+      let { item, id } = x;
+      let search = shopData.findIndex((y) => y.id === id) || [];
+      if (search) {
+        shopData[search].desc = shopData[search].desc - item;
+      }
+    });
+
+    db.productList
+      .bulkPut(shopData)
+      .then(function (lastKey) {
+        //console.log("Done putting 100,000 raindrops all over the place");
+        console.log("Last raindrop's id was: " + lastKey); // Will be 100000.
+      })
+      .catch(Dexie.BulkError, function (e) {
+        // Explicitely catching the bulkAdd() operation makes those successful
+        // additions commit despite that there were errors.
+        console.error(
+          "Some raindrops did not succeed. However, " +
+            100000 -
+            e.failures.length +
+            " raindrops was added successfully"
+        );
+      });
+  });
+}
+window.localStorage.clear();

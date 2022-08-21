@@ -17,14 +17,14 @@ let shopItemsData = [
     id: "smartwatch",
     name: "Smart Watch",
     price: 500,
-    desc: 6,
+    desc: 4,
     img: "images/smartwatch.jpg",
   },
   {
     id: "camera",
     name: "Camera",
     price: 800,
-    desc: 7,
+    desc: 17,
     img: "images/camera.jpg",
   },
   {
